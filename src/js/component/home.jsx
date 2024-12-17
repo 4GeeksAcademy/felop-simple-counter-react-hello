@@ -1,86 +1,89 @@
-
-
-//include images into your bundle
 import React, { useState, useEffect } from "react";
 
-//create your first component
 const Home = () => {
-	const [time, setTime] = useState(0); // Almacena el tiempo inicial
-  const [inputTime, setInputTime] = useState(""); // Almacena lo ingresado por el usuario
-  const [isRunning, setIsRunning] = useState(false); // Controla el inicio/pausa del contador
+  const [seconds, setSeconds] = useState(0); 
+  const [countdown, setCountdown] = useState(0); 
+  const [isRunning, setIsRunning] = useState(false); 
+  const [isPaused, setIsPaused] = useState(false); 
 
-  // Efecto para manejar el contador regresivo
-  useEffect(() => {
-    let timer = null;
-    if (isRunning && time > 0) {
-      timer = setInterval(() => {
-        setTime((prevTime) => prevTime - 1);
-      }, 1000);
-    } else if (time === 0 && isRunning) {
-      setIsRunning(false); // Detener el contador al llegar a 0
-    }
+  const [hasCountdownEnded, setHasCountdownEnded] = useState(false);
 
-    return () => clearInterval(timer); // Limpiar el intervalo
-  }, [isRunning, time]);
-
-  // Función para iniciar el contador
-  const startCounter = () => {
-    if (inputTime && !isNaN(inputTime) && parseInt(inputTime) > 0) {
-      setTime(parseInt(inputTime));
-      setIsRunning(true);
-    }
+  
+  const handleStart = () => {
+    setCountdown(seconds);
+    setIsRunning(true);
+    setHasCountdownEnded(false);
   };
 
-  // Función para pausar/reanudar
-  const togglePause = () => {
-    setIsRunning(!isRunning);
+ 
+  const handlePause = () => {
+    setIsPaused((prev) => !prev); 
   };
 
-  // Función para reiniciar
-  const resetCounter = () => {
+  
+  const handleReset = () => {
+    setCountdown(0);
+    setSeconds(0);
     setIsRunning(false);
-    setTime(0);
-    setInputTime("");
+    setIsPaused(false);
+    setHasCountdownEnded(false);
   };
+
+ 
+  useEffect(() => {
+    let interval = null;
+
+    if (isRunning && !isPaused) {
+      interval = setInterval(() => {
+        setCountdown((prevCountdown) => {
+          if (prevCountdown > 0) {
+            return prevCountdown - 1;
+          } else {
+            clearInterval(interval);
+            setIsRunning(false);
+            setHasCountdownEnded(true);
+            return 0;
+          }
+        });
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+
+    return () => clearInterval(interval);
+  }, [isRunning, isPaused]);
 
   return (
-    <div className="text-center mt-5">
-      <h1>Contador Regresivo</h1>
+    <div className="text-center">
+      <h1>Contador de Segundos</h1>
 
-      {/* Input para establecer los segundos */}
-      <div>
-        <input
-          type="number"
-          placeholder="Segundos"
-          value={inputTime}
-          onChange={(e) => setInputTime(e.target.value)}
-          disabled={isRunning}
-        />
-        <button onClick={startCounter} disabled={isRunning || inputTime === ""}>
-          Iniciar
-        </button>
-      </div>
+   
+      <input
+        type="number"
+        placeholder="Ingresa segundos"
+        value={seconds}
+        onChange={(e) => setSeconds(parseInt(e.target.value) || 0)}
+        disabled={isRunning}
+      />
 
-      {/* Mostrar el contador */}
-      <div className="counter mt-3">
-        {time > 0 ? (
-          <h2>{time.toString().padStart(4, "0")}</h2>
+      <div style={{ fontSize: "3rem", margin: "20px" }}>
+        {hasCountdownEnded ? (
+          <span style={{ color: "red", fontWeight: "bold" }}>TE PETATEASTE MI COMPA</span>
         ) : (
-          <h2 style={{ color: "red" }}>TE PETATEASTE MI COMPA</h2>
+          countdown.toString().padStart(4, "0")
         )}
       </div>
 
-      {/* Botones de control */}
-      <div className="controls mt-3">
-        <button onClick={togglePause} disabled={time === 0}>
-          {isRunning ? "Pausar" : "Reanudar"}
-        </button>
-        <button onClick={resetCounter}>Reiniciar</button>
-      </div>
+      
+      <button type="button" class="btn btn-success" onClick={handleStart} disabled={isRunning}>
+        Iniciar
+      </button>
+      <button type="button" class="btn btn-warning" onClick={handlePause} disabled={!isRunning}>
+        {isPaused ? "Reanudar" : "Parar"}
+      </button>
+      <button type="button" class="btn btn-danger" onClick={handleReset}>Reiniciar</button>
     </div>
   );
 };
-
-
 
 export default Home;
