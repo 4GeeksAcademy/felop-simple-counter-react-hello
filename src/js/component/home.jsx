@@ -66,7 +66,7 @@ const Home = () => {
         disabled={isRunning}
       />
 
-      <div style={{ fontSize: "3rem", margin: "20px" }}>
+      <div style={{ fontSize: "5rem", margin: "20px" , color:"white", background:"black"}}>
         {hasCountdownEnded ? (
           <span style={{ color: "red", fontWeight: "bold" }}>TE PETATEASTE MI COMPA</span>
         ) : (
