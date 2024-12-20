@@ -23,12 +23,13 @@ body {
   button {
     margin: 5px;
     padding: 10px 20px;
-    font-size: 10rem;
+    
     cursor: pointer;
   }
   
   input {
     padding: 2px;
-    font-size: 3rem;
-    width: 70px;
+    font-size: rem;
+    width: 40px;
+    height:30px;
   }

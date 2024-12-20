@@ -1,89 +1,134 @@
 import React, { useState, useEffect } from "react";
 
 const Home = () => {
-  const [seconds, setSeconds] = useState(0); 
   const [countdown, setCountdown] = useState(0); 
-  const [isRunning, setIsRunning] = useState(false); 
-  const [isPaused, setIsPaused] = useState(false); 
+  const [isPaused, setIsPaused] = useState(false);
+  const [isCountdownMode, setIsCountdownMode] = useState(false); 
+  const [showBoom, setShowBoom] = useState(false); 
+  const [inputValue, setInputValue] = useState(""); 
 
-  const [hasCountdownEnded, setHasCountdownEnded] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isPaused) {
+        setShowBoom(false); 
+
+        setCountdown((prev) => {
+          if (isCountdownMode) {
+            if (prev > 0) {
+              return prev - 1;
+            } else {
+              setShowBoom(true); 
+              return 0;
+            }
+          } else {
+            return prev + 1; 
+          }
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(interval); 
+  }, [isPaused, isCountdownMode]);
 
   
-  const handleStart = () => {
-    setCountdown(seconds);
-    setIsRunning(true);
-    setHasCountdownEnded(false);
-  };
-
- 
   const handlePause = () => {
-    setIsPaused((prev) => !prev); 
+    setIsPaused((prev) => !prev);
   };
 
   
   const handleReset = () => {
     setCountdown(0);
-    setSeconds(0);
-    setIsRunning(false);
+    setShowBoom(false); 
     setIsPaused(false);
-    setHasCountdownEnded(false);
   };
 
- 
-  useEffect(() => {
-    let interval = null;
-
-    if (isRunning && !isPaused) {
-      interval = setInterval(() => {
-        setCountdown((prevCountdown) => {
-          if (prevCountdown > 0) {
-            return prevCountdown - 1;
-          } else {
-            clearInterval(interval);
-            setIsRunning(false);
-            setHasCountdownEnded(true);
-            return 0;
-          }
-        });
-      }, 1000);
-    } else {
-      clearInterval(interval);
+  
+  const toggleMode = () => {
+    setIsCountdownMode((prev) => !prev);
+    if (!isCountdownMode) {
+      setCountdown(0); 
     }
+  };
 
-    return () => clearInterval(interval);
-  }, [isRunning, isPaused]);
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  
+  const handleSetCountdown = () => {
+    const number = parseInt(inputValue, 10);
+    if (!isNaN(number) && number >= 0) {
+      setCountdown(number);
+      setInputValue(""); 
+    } else {
+      alert("Pone algo principe");
+    }
+  };
+
+  
+  const formattedCountdown = countdown.toString().padStart(4, "0");
 
   return (
     <div className="text-center">
       <h1>Contador de Segundos</h1>
 
-   
-      <input
-        type="number"
-        placeholder="Ingresa segundos"
-        value={seconds}
-        onChange={(e) => setSeconds(parseInt(e.target.value) || 0)}
-        disabled={isRunning}
-      />
-
-      <div style={{ fontSize: "5rem", margin: "20px" , color:"white", background:"black"}}>
-        {hasCountdownEnded ? (
-          <span style={{ color: "red", fontWeight: "bold" }}>TE PETATEASTE MI COMPA</span>
-        ) : (
-          countdown.toString().padStart(4, "0")
-        )}
+    
+      <div style={{ display: "flex", justifyContent: "center", gap: "10px", fontSize: "3rem" }}>
+        {formattedCountdown.split("").map((digit, index) => (
+          <div
+            key={index}
+            style={{
+              border: "1px solid black",
+              borderRadius: "5px",
+              padding: "10px",
+              width: "40px",
+              textAlign: "center",
+              backgroundColor: "#f0f0f0",
+            }}
+          >
+            {digit}
+          </div>
+        ))}
       </div>
 
+     
+      {showBoom && (
+        <div style={{ color: "red", marginTop: "20px", fontSize: "5rem" }}>
+          TE PETATEASTE MI COMPA
+        </div>
+      )}
+
       
-      <button type="button" class="btn btn-success" onClick={handleStart} disabled={isRunning}>
-        Iniciar
-      </button>
-      <button type="button" class="btn btn-warning" onClick={handlePause} disabled={!isRunning}>
-        {isPaused ? "Reanudar" : "Parar"}
-      </button>
-      <button type="button" class="btn btn-danger" onClick={handleReset}>Reiniciar</button>
+      {isCountdownMode && (
+        <div style={{ marginTop: "20px" }}>
+          <input
+            type="number"
+            placeholder=""
+            value={inputValue}
+            onChange={handleInputChange}
+            style={{ padding: "5px", marginRight: "10px" }}
+          />
+          <button type="button" class="btn btn-info" onClick={handleSetCountdown}>T-</button>
+        </div>
+      )}
+
+    
+      <div style={{ marginTop: "20px" }}>
+        <button onClick={handlePause}type="button" class="btn btn-success">
+          {isPaused ? "Reanudar" : "Pausar"}
+        </button>
+        <button onClick={handleReset}type="button" class="btn btn-warning" style={{ marginLeft: "10px" }}>
+          Reiniciar
+        </button>
+        <button onClick={toggleMode}type="button" class="btn btn-danger" style={{ marginLeft: "10px" }}>
+          {isCountdownMode ? "Cuenta Progresiva" : "Cuenta Regresiva"}
+        </button>
+      </div>
     </div>
   );
 };
 
 export default Home;
+ 
